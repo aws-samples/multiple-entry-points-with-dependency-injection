@@ -1,7 +1,10 @@
 ## Multiple Entry Points with Java Dependency Injection Frameworks
 
-This repo is a proof of concept demonstrating how to invoke multiple entry points using popular dependency injection frameworks
-such as Spring, Micronaut, and Guice with Java Spark.  Follow the steps below to complete the demonstrations.
+At a high level, this repo is a proof of concept demonstrating how to invoke multiple entry points using popular dependency injection frameworks
+such as Spring, Micronaut, and Guice with Java Spark.
+
+More specifically, each of the examples below demonstrates how you can invoke a bean's logic, which says `hello`, directly or through 
+a RESTful API by setting the environment variable, `alternativeEntryPoint`.
 
 ### Build the jar
 1. `cd` to the project's root directory.
