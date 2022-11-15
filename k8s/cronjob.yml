@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: my-service
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello-service
+            image: {username}/multiple-entry-points:local # This is the Java API image with the second entry point.
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: ALTERNATIVE_ENTRY_POINT
+              value: "periodicRun"
+            - name: AMOUNT_TO_TAX
+              value: "10"
+          restartPolicy: OnFailure

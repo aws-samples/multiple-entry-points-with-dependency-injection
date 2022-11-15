@@ -1,27 +1,25 @@
-// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: MIT-0
-
 package com.amazon.spring;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class SpringController {
 
-    private final SpringService springService;
+    private final TaxService taxService;
 
     @Autowired
-    public SpringController(SpringService springService) {
-        this.springService = springService;
+    public SpringController(TaxService taxService) {
+        this.taxService = taxService;
     }
 
     @GetMapping("/")
-    public ResponseEntity<String> sayHello() {
-        String hello = this.springService.sayHello();
-        return ResponseEntity.ok(hello);
+    public ResponseEntity<Double> sayHello(@RequestParam double amountToTax) {
+        double tax = this.taxService.calculateTax(amountToTax);
+        return ResponseEntity.ok(tax);
     }
 
 }

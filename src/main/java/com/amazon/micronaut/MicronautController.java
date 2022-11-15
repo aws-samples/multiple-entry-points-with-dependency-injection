@@ -1,25 +1,23 @@
-// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: MIT-0
-
 package com.amazon.micronaut;
 
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.QueryValue;
 import jakarta.inject.Inject;
 
 @Controller
 public class MicronautController {
 
-    private final MicronautService springService;
+    private final TaxService taxService;
 
     @Inject
-    public MicronautController(MicronautService springService) {
-        this.springService = springService;
+    public MicronautController(TaxService taxService) {
+        this.taxService = taxService;
     }
 
     @Get
-    public String sayHello() {
-        return this.springService.sayHello();
+    public double calculateTax(@QueryValue double amountToTax) {
+        return this.taxService.calculateTax(amountToTax);
     }
 
 }

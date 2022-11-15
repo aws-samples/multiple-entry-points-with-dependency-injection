@@ -1,6 +1,3 @@
-// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: MIT-0
-
 package com.amazon.guice;
 
 import com.google.inject.Guice;
@@ -23,19 +20,20 @@ public class GuiceEntryPoint {
          * that property.  If so, run the logic and exit.  If an alternative entry point property does not exist, then
          * allow the spring application to run as normal.
          */
-        Optional.ofNullable(System.getenv("alternativeEntryPoint"))
+        Optional.ofNullable(System.getenv("ALTERNATIVE_ENTRY_POINT"))
                 .ifPresent(
                         arg -> {
                             int exitCode = 0;
 
                             try {
-                                if (arg.equals("helloService")) {
-                                    String hello = injector.getInstance(GuiceService.class).sayHello();
-                                    System.out.println(hello);
+                                if (arg.equals("periodicRun")) {
+                                    double amountToTax = Double.parseDouble(System.getenv("AMOUNT_TO_TAX"));
+                                    double tax = injector.getInstance(TaxService.class).calculateTax(amountToTax);
+                                    System.out.println("Tax is " + tax);
                                 }
                                 else {
                                     throw new IllegalArgumentException(
-                                            String.format("Did not recognize alternativeEntryPoint, %s", arg)
+                                            String.format("Did not recognize ALTERNATIVE_ENTRY_POINT, %s", arg)
                                     );
                                 }
                             }
@@ -64,12 +62,15 @@ public class GuiceEntryPoint {
     }
 
     void run(final int port) {
-        final GuiceService guiceService = GuiceEntryPoint.injector.getInstance(GuiceService.class);
+        final TaxService taxService = GuiceEntryPoint.injector.getInstance(TaxService.class);
 
         port(port);
 
         get("/", (req, res) -> {
-            return guiceService.sayHello();
+            String amountToTaxString = req.queryParams("amountToTax");
+            double amountToTax = Double.parseDouble(amountToTaxString);
+
+            return taxService.calculateTax(amountToTax);
         });
     }
 

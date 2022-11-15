@@ -1,10 +1,5 @@
-## Multiple Entry Points with Java Dependency Injection Frameworks
-
-At a high level, this repo is a proof of concept demonstrating how to invoke multiple entry points using popular dependency injection frameworks
-such as Spring, Micronaut, and Guice with Java Spark.
-
-More specifically, each of the examples below demonstrates how you can invoke a bean's logic, which says `hello`, directly or through 
-a RESTful API by setting the environment variable, `alternativeEntryPoint`.
+This repo is a proof of concept demonstrating how to invoke multiple entry points using popular dependency injection frameworks
+such as Spring, Micronaut, and Guice with Java Spark.  Follow the steps below to complete the demonstrations.
 
 ### Build the jar
 1. `cd` to the project's root directory.
@@ -12,39 +7,51 @@ a RESTful API by setting the environment variable, `alternativeEntryPoint`.
 
 #### Spring Boot
 1. `cd` to the project's root directory.
-2. Run `export alternativeEntryPoint=helloService`.
+2. Run `export ALTERNATIVE_ENTRY_POINT=periodicRun && export AMOUNT_TO_TAX=10`.
 3. Run `java -cp ./target/multiple-entry-points-with-dependency-injection-1.0-SNAPSHOT.jar com.amazon.spring.SpringBootEntryPoint`.  You should see
-   `Hello from Spring` among the output and the Spring app and JVM should exit.
-4. Run `unset alternativeEntryPoint`.
+   `Tax is 0.7` among the output and the Spring app and JVM should exit.
+4. Run `unset ALTERNATIVE_ENTRY_POINT && unset AMOUNT_TO_TAX`.
 5. Run `java -cp ./target/multiple-entry-points-with-dependency-injection-1.0-SNAPSHOT.jar com.amazon.spring.SpringBootEntryPoint` again.
-6. Open another terminal and run `curl http://localhost:8080`.  You should see `Hello from Spring` as the output.
+6. Open another terminal and run `curl http://localhost:8080?amountToTax=10`.  You should see `0.7` as the output.
 7. Close the app by pressing Ctrl+C.
 
 #### Micronaut
 1. `cd` to the project's root directory.
-2. Run `export alternativeEntryPoint=helloService`.
+2. Run `export ALTERNATIVE_ENTRY_POINT=periodicRun && export AMOUNT_TO_TAX=10`.
 3. Run `java -cp ./target/multiple-entry-points-with-dependency-injection-1.0-SNAPSHOT.jar com.amazon.micronaut.MicronautEntryPoint`.  You should see
-   `Hello from Micronaut` among the output and the Micronaut app and JVM should exit.
-4. Run `unset alternativeEntryPoint`.
+   `Tax is 0.7` among the output and the Micronaut app and JVM should exit.
+4. Run `unset ALTERNATIVE_ENTRY_POINT && unset AMOUNT_TO_TAX`.
 5. Run `java -cp ./target/multiple-entry-points-with-dependency-injection-1.0-SNAPSHOT.jar com.amazon.micronaut.MicronautEntryPoint` again.
-6. Open another terminal and run `curl http://localhost:8080`.  You should see `Hello from Micronaut` as the output.
+6. Open another terminal and run `curl http://localhost:8080?amountToTax=10`.  You should see `0.7` as the output.
 7. Close the app by pressing Ctrl+C.
 
 #### Guice with Spark Java
 1. `cd` to the project's root directory.
-2. Run `export alternativeEntryPoint=helloService`.
+2. Run `export ALTERNATIVE_ENTRY_POINT=periodicRun && export AMOUNT_TO_TAX=10`.
 3. Run `java -cp ./target/multiple-entry-points-with-dependency-injection-1.0-SNAPSHOT.jar com.amazon.guice.GuiceEntryPoint`.  You should see
-   `Hello from Guice & Java Spark` among the output and the Guice and Java Spark app and JVM should exit.
-4. Run `unset alternativeEntryPoint`.
+   `Tax is 0.7` among the output and the Guice and Java Spark app and JVM should exit.
+4. Run `unset ALTERNATIVE_ENTRY_POINT && unset AMOUNT_TO_TAX`.
 5. Run `java -cp ./target/multiple-entry-points-with-dependency-injection-1.0-SNAPSHOT.jar com.amazon.guice.GuiceEntryPoint` again.
-6. Open another terminal and run `curl http://localhost:8080`.  You should see `Hello from Guice & Java Spark` as the output.
+6. Open another terminal and run `curl http://localhost:8080?amountToTax=10`.  You should see `0.7` as the output.
 7. Close the app by pressing Ctrl+C.
 
-## Security
+#### Kubernetes 
+**Note:** In order to complete the steps below, you will need a Kubernetes cluster.  One of the simplest solutions is, if 
+you have Docker Desktop, you can enable a local Kubernetes cluster.  Follow these directions to do so: https://docs.docker.com/desktop/kubernetes/#enable-kubernetes  
 
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+### CronJob
+1. Build the docker image by running `docker build -t "$(whoami)"/multiple-entry-points:local .`.
+2. Run `docker images`.  You should see the image in the output.
+3. Run `sed 's/{username}/'"$(whoami)"'/' k8s/cronjob.yml | kubectl apply -f -` to create the Kubernetes CronJob resource that executes every 1 minute.
+4. Run `kubectl get jobs --watch` to watch the jobs that the CronJob resource creates.
+5. Once a job is created, get job's pod name by running `pods=$(kubectl get pods --selector=job-name={job name goes here} --output=jsonpath={.items[*].metadata.name})`.
+Be sure to replace the placeholder with the name of the job.  For example, if the job name is `my-service-27808790`, then the command would be
+`pods=$(kubectl get pods --selector=job-name=my-service-27808790 --output=jsonpath={.items[*].metadata.name})`.
+6. Run `kubectl logs $pods` to see the logs of the job's pod.  You should see `Tax is 0.7` among the output.
+7. Clean up the CronJob resource by running `sed 's/{username}/'"$(whoami)"'/' k8s/cronjob.yml | kubectl delete -f -`.
 
-## License
-
-This library is licensed under the MIT-0 License. See the LICENSE file.
-
+### REST API Pod
+1. Run `sed 's/{username}/'"$(whoami)"'/' k8s/pod.yml | kubectl apply -f -` to create a pod for the REST API.
+2. Run `kubectl apply -f k8s/service.yml` to create a service that exposes the REST API pod to clients outside the Kubernetes cluster.
+3. Run `curl http://localhost:30000?amountToTax=10`.  You should see `0.7` as the output.
+4. Clean up the Service and Pod resources by running `kubectl delete -f k8s/service.yml && sed 's/{username}/'"$(whoami)"'/' k8s/pod.yml | kubectl delete -f -`.
