@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: my-service
+  name: tax-service
 spec:
   schedule: "* * * * *"
   jobTemplate:
@@ -9,7 +9,7 @@ spec:
       template:
         spec:
           containers:
-          - name: hello-service
+          - name: tax-service
             image: {username}/multiple-entry-points:local # This is the Java API image with the second entry point.
             imagePullPolicy: IfNotPresent
             env:

@@ -40,18 +40,19 @@ such as Spring, Micronaut, and Guice with Java Spark.  Follow the steps below to
 you have Docker Desktop, you can enable a local Kubernetes cluster.  Follow these directions to do so: https://docs.docker.com/desktop/kubernetes/#enable-kubernetes  
 
 ### CronJob
-1. Build the docker image by running `docker build -t "$(whoami)"/multiple-entry-points:local .`.
-2. Run `docker images`.  You should see the image in the output.
-3. Run `sed 's/{username}/'"$(whoami)"'/' k8s/cronjob.yml | kubectl apply -f -` to create the Kubernetes CronJob resource that executes every 1 minute.
-4. Run `kubectl get jobs --watch` to watch the jobs that the CronJob resource creates.
-5. Once a job is created, get job's pod name by running `pods=$(kubectl get pods --selector=job-name={job name goes here} --output=jsonpath={.items[*].metadata.name})`.
+1. `cd` to the project's root directory.
+2. Build the docker image by running `docker build -t "$(whoami)"/multiple-entry-points:local .`.
+3. Run `docker images`.  You should see the image in the output.
+4. Run `k8s/replace_username.sh k8s/cronjob.yml | kubectl apply -f -` to create the Kubernetes CronJob resource that executes every 1 minute.
+5. Run `kubectl get jobs --watch` to watch the jobs that the CronJob resource creates.
+6. Once a job is created, get job's pod name by running `pods=$(kubectl get pods --selector=job-name={job name goes here} --output=jsonpath={.items[*].metadata.name})`.
 Be sure to replace the placeholder with the name of the job.  For example, if the job name is `my-service-27808790`, then the command would be
 `pods=$(kubectl get pods --selector=job-name=my-service-27808790 --output=jsonpath={.items[*].metadata.name})`.
-6. Run `kubectl logs $pods` to see the logs of the job's pod.  You should see `Tax is 0.7` among the output.
-7. Clean up the CronJob resource by running `sed 's/{username}/'"$(whoami)"'/' k8s/cronjob.yml | kubectl delete -f -`.
+7. Run `kubectl logs $pods` to see the logs of the job's pod.  You should see `Tax is 0.7` among the output.
+8. Clean up the CronJob resource by running `k8s/replace_username.sh k8s/cronjob.yml | kubectl delete -f -`.
 
 ### REST API Pod
-1. Run `sed 's/{username}/'"$(whoami)"'/' k8s/pod.yml | kubectl apply -f -` to create a pod for the REST API.
+1. Run `k8s/replace_username.sh k8s/pod.yml | kubectl apply -f -` to create a pod for the REST API.
 2. Run `kubectl apply -f k8s/service.yml` to create a service that exposes the REST API pod to clients outside the Kubernetes cluster.
 3. Run `curl http://localhost:30000?amountToTax=10`.  You should see `0.7` as the output.
-4. Clean up the Service and Pod resources by running `kubectl delete -f k8s/service.yml && sed 's/{username}/'"$(whoami)"'/' k8s/pod.yml | kubectl delete -f -`.
+4. Clean up the Service and Pod resources by running `kubectl delete -f k8s/service.yml && k8s/replace_username.sh k8s/pod.yml | kubectl delete -f -`.
