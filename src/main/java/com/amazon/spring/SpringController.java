@@ -17,7 +17,7 @@ public class SpringController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<Double> sayHello(@RequestParam double amountToTax) {
+    public ResponseEntity<Double> getTax(@RequestParam double amountToTax) {
         double tax = this.taxService.calculateTax(amountToTax);
         return ResponseEntity.ok(tax);
     }
