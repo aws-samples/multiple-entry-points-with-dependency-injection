@@ -102,7 +102,7 @@
         <dependency>
             <groupId>io.micronaut</groupId>
             <artifactId>micronaut-http-server-netty</artifactId>
-            <version>3.5.2</version>
+            <version>3.8.3</version>
             <scope>compile</scope>
         </dependency>
 
